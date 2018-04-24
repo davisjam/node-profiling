@@ -102,8 +102,3 @@ In order of increasing complexity:
 - b0rk's [cartoon guide](https://jvns.ca/blog/2018/04/16/new-perf-zine/)
 - brendangregg's [detailed guide](http://brendangregg.com/perf.html)
 - Linux [Wiki](https://perf.wiki.kernel.org/index.php/Main_Page)
-
-# Related projects
-
-- [0x](https://github.com/davidmarkclements/0x) (Event Loop (V8) only, or via perf)
-- [flamebearer](https://github.com/mapbox/flamebearer) (Event Loop (V8) only)
