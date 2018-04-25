@@ -1,3 +1,6 @@
 [submodule "benchmarks/node-dc/Node-DC-SSR"]
 	path = benchmarks/node-dc/Node-DC-SSR
 	url = git@github.com:davisjam/Node-DC-SSR.git
+[submodule "benchmarks/node-dc/Node-DC-EIS"]
+	path = benchmarks/node-dc/Node-DC-EIS
+	url = git@github.com:davisjam/Node-DC-EIS.git
