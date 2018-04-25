@@ -11,7 +11,7 @@ use JSON::PP;
 use File::Basename;
 
 # Scripts
-my $root = "Node-DC-EIS";
+my $root = "$ENV{NODE_PROFILING_ROOT}/benchmarks/node-dc/Node-DC-EIS";
 my $serverDir = "$root/Node-DC-EIS-cluster";
 my $clientDir = "$root/Node-DC-EIS-client";
 
@@ -27,28 +27,42 @@ for my $script ($server, $client, $clientConfig) {
 }
 
 if (not @ARGV) {
-  print "Usage: $0 { [--minCPUs M] [--maxCPUs N] | --onlyClient }\nExample: $0 --minCPUs 1 --maxCPUs `nproc`\n";
+  print "Usage: $0 --clientHost X { [--minCPUs M] [--maxCPUs N] | --onlyClient }\nExample: $0 --clientHost jamie\@toybox.cs.vt.edu --minCPUs 1 --maxCPUs `nproc`\n";
   exit 1;
 }
 
 # Args
+my $clientHost;
+my $clientConcurrency = 50;
 my $minCPUs = 1;
 my $maxCPUs = `nproc`; chomp $maxCPUs;
 my $onlyClient = 0;
 
-GetOptions ("minCPUs=i" => \$minCPUs,
+GetOptions ("clientHost=s" => \$clientHost,
+            "clientConcurrency=i" => \$clientConcurrency,
+            "minCPUs=i" => \$minCPUs,
             "maxCPUs=i" => \$maxCPUs,
             "onlyClient" => \$onlyClient,
            ) or die("Error in command line arguments\n");
 
+# Required args
+if (not $clientHost) {
+  die "Error, no clientHost specified\n";
+}
+
+# Summary
 &log("ARGS:");
+&log("  clientHost $clientHost");
+&log("  clientConcurrency $clientConcurrency");
 &log("  minCPUs $minCPUs");
 &log("  maxCPUs $maxCPUs");
 &log("  onlyClient $onlyClient");
 
+my $clientInfo = { "host" => $clientHost, "concurrency" => $clientConcurrency };
+
 if ($onlyClient) {
   &log("Running client");
-  my $performance = &runClient();
+  my $performance = &runClient($clientInfo);
 } else {
   # Run
   my @results;
@@ -58,7 +72,7 @@ if ($onlyClient) {
     $serverInfo = &startServer($nCPUs);
     &log("Started server with pid $serverInfo->{pid}");
   
-    my $performance = &runClient();
+    my $performance = &runClient($clientInfo);
     push @results, { "nCPUs" => $nCPUs, "performance" => $performance };
   
     &stopServer($serverInfo);
@@ -122,10 +136,11 @@ sub stopServer {
 }
 
 sub runClient {
+  my ($clientInfo) = @_;
   my $_client = "./" . basename($client);
   my $_clientConfig = "./" . basename($clientConfig);
 
-  my $out = &chkcmd("cd $clientDir; NODE_DC_EIS_RNG_SEED=10 $_client -f $_clientConfig 2>&1");
+  my $out = &chkcmd("ssh $clientInfo->{host} 'cd $clientDir; NODE_DC_EIS_RNG_SEED=10 $_client -f $_clientConfig --nograph --concurrency $clientInfo->{concurrency} --request 50000 --rampup_rampdown 5000 --run_mode requests 2>&1'");
   if ($out =~ m/JSON-formatted result: <(.*)>/) {
     my $jsonResult = $1;
     return decode_json($jsonResult);
