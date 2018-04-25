@@ -1,0 +1,65 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+if (not defined $ENV{NODE_PROFILING_ROOT}) {
+  die "Error, you must define NODE_PROFILING_ROOT\n";
+}
+
+&log("Configuring repo");
+
+# Submodules
+&log("Initializing/updating submodules");
+&chkcmd("git submodule update --init --recursive");
+
+# Benchmarks
+&log("Configuring benchmarks");
+&configureBenchmarks();
+
+&log("Configuration complete");
+exit 0;
+
+####################
+# Configuration steps
+####################
+
+# Backup: https://github.com/davisjam/redos-detector-backup
+sub configureBenchmarks {
+  &configureNodeDCEIS();
+  &configureNodeDCSSR();
+  return;
+}
+
+sub configureNodeDCEIS {
+  &chkcmd("cd $ENV{NODE_PROFILING_ROOT}/benchmarks/node-dc/Node-DC-EIS/Node-DC-EIS-cluster && npm install");
+  return;
+}
+
+sub configureNodeDCSSR {
+  &chkcmd("cd $ENV{NODE_PROFILING_ROOT}/benchmarks/node-dc/Node-DC-SSR/Node-DC-SSR-electrode && npm install && node node_modules/xclap/bin/clap.js build");
+  return;
+}
+
+####################
+# Utility
+####################
+
+sub chkcmd {
+  my ($cmd) = @_;
+
+  &log("$cmd");
+  my $out = `$cmd`;
+
+  my $rc = $? >> 8;
+  if ($rc) {
+    die "Error, $cmd gave rc $rc:\n$out\n";
+  }
+
+  return $out;
+}
+
+sub log {
+  my ($msg) = @_;
+  print STDOUT "$msg\n";
+}
