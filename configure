@@ -26,23 +26,23 @@ exit 0;
 
 # Backup: https://github.com/davisjam/redos-detector-backup
 sub configureBenchmarks {
+  &configureNodeDC();
+}
+
+sub configureNodeDC {
+  # Dependencies shared by the Node-DC benchmarks
+  &chkcmd("sudo apt-get install -y python python-pip");
+  &chkcmd("pip install --user numpy requests eventlet");
   &configureNodeDCEIS();
   &configureNodeDCSSR();
-  return;
 }
 
 sub configureNodeDCEIS {
-  &chkcmd("sudo apt-get install -y python python-pip");
-  &chkcmd("pip install --user numpy requests eventlet");
   &chkcmd("cd $ENV{NODE_PROFILING_ROOT}/benchmarks/node-dc/Node-DC-EIS/Node-DC-EIS-cluster && npm install");
-  return;
 }
 
 sub configureNodeDCSSR {
-  &chkcmd("sudo apt-get install -y python python-pip");
-  &chkcmd("pip install --user numpy requests eventlet");
   &chkcmd("cd $ENV{NODE_PROFILING_ROOT}/benchmarks/node-dc/Node-DC-SSR/Node-DC-SSR-electrode && npm install && node node_modules/xclap/bin/clap.js build");
-  return;
 }
 
 ####################
