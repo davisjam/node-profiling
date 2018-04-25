@@ -1,4 +1,4 @@
-# Profiling with perf
+# Profiling with 0x
 
 This is a guide to profiling Node.js applications with [0x](https://github.com/davidmarkclements/0x).
 
@@ -32,6 +32,11 @@ See the usage message for other behavior.
 - Server: `0x server-cluster.js`
 - Client: Run your client here.
 
+What can you see from this view?
+
+- You *can* see JS function calls in your application, e.g. to your calls or to Node.js core modules like zlib.
+- You *cannot* see C++-land function calls, e.g. regex evaluations or JSON activity. (Strange, because using flamebearer you can see these?)
+
 ## Full application
 
 - Server: `0x --kernel-tracing server-cluster.js`
@@ -41,3 +46,5 @@ This will use OS support for application tracing.
 On Linux it uses perf under the hood.
 
 WARNING: Until [this issue](https://github.com/davidmarkclements/0x/issues/113) is resolved, this won't work well.
+In fact, I haven't been able to make this mode work at all (on Ubuntu), even on my CPU-intensive synthetic benchmarks.
+I suspect there is a bug in 0x's post-processing of `perf script`.
