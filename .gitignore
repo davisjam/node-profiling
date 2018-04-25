@@ -1,0 +1,4 @@
+isolate-*
+perf.*
+flamegraph.html
+*.0x
